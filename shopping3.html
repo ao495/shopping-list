@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>買い物チェックリスト（タブ＆購入履歴付き）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+    background: #f4f4f9;
+  }
+  .container {
+    max-width: 600px;
+    margin: auto;
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tab {
+    flex-grow: 1;
+    padding: 10px 0;
+    text-align: center;
+    background: #eee;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+    color: #444;
+    transition: background 0.3s, color 0.3s;
+  }
+  .tab.active {
+    background: #3498db;
+    color: #fff;
+  }
+  .input-area {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  #itemInput {
+    flex-grow: 1;
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  #addBtn {
+    background: #2ecc71;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #addBtn:hover {
+    background: #27ae60;
+  }
+  ul#list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  ul#list li {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+    margin-bottom: 8px;
+    padding: 10px 12px;
+  }
+  .item-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .item-main > input[type="checkbox"] {
+    order: 0;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+  }
+  .item-main > span {
+    order: 1;
+    flex-grow: 1;
+    margin-left: 10px;
+    user-select: text;
+    outline-offset: 2px;
+  }
+  .item-main > small {
+    order: 2;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: #555;
+    margin-left: 10px;
+    flex-shrink: 0;
+  }
+  .item-main > button.toggle-detail {
+    order: 3;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .item-main > button.delete-btn {
+    order: 4;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    user-select: none;
+    transition: background-color 0.2s;
+  }
+  .item-main > button.delete-btn:hover {
+    background: #c0392b;
+  }
+  .item-detail {
+    padding-left: 34px;
+    font-size: 0.75rem;
+    color: #555;
+    margin-top: 4px;
+    user-select: none;
+  }
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: flex-end;
+  }
+  .btn-group button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+  }
+  #deleteCheckedBtn {
+    background: #f1c40f;
+    color: #000;
+  }
+  #deleteCheckedBtn:hover {
+    background: #d4ac0d;
+  }
+  #clearBtn {
+    background: #e74c3c;
+    color: white;
+  }
+  #clearBtn:hover {
+    background: #c0392b;
+  }
+  /* スマホなど狭い画面で文字折返し対応 */
+  @media (max-width: 480px) {
+    .item-main > small {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container" role="main" aria-label="買い物チェックリスト">
+  <nav class="tabs" role="tablist" aria-label="買い物リストタブ">
+    <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="panel-0" id="tab-0">買い物リスト</div>
+    <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-1" id="tab-1">必要なもの</div>
+    <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-2" id="tab-2">その他</div>
+  </nav>
+
+  <div class="input-area">
+    <input id="itemInput" type="text" list="historyList" placeholder="項目を入力" aria-label="項目入力" autocomplete="off" />
+    <datalist id="historyList"></datalist>
+    <button id="addBtn" aria-label="項目追加">追加</button>
+  </div>
+
+  <ul id="list" role="list" aria-label="現在の買い物リスト"></ul>
+
+  <div class="btn-group">
+    <button id="deleteCheckedBtn" aria-label="チェック済み項目削除">✔️ チェック済み削除</button>
+    <button id="clearBtn" aria-label="全項目削除">全削除</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const tabs = document.querySelectorAll(".tab");
+  const listEl = document.getElementById("list");
+  const inputEl = document.getElementById("itemInput");
+  const addBtn = document.getElementById("addBtn");
+  const deleteCheckedBtn = document.getElementById("deleteCheckedBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const dataListEl = document.getElementById("historyList");
+
+  let currentTab = 0;
+
+  // 各タブのデータ配列格納用オブジェクト
+  // 形式: {0: [...], 1: [...], 2: [...]}
+  let allTabsData = {};
+  // 履歴ワード配列
+  let history = [];
+
+  // 保存先キー名
+  const STORAGE_KEY = "shoppingListTabsData_v3";
+  const HISTORY_KEY = "shoppingListHistory_v3";
+  const TAB_INDEX_KEY = "shoppingListCurrentTab_v3";
+
+  // 日付フォーマット
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    return `${d.getMonth()+1}/${d.getDate()}`;
+  };
+
+  // 経過日数計算
+  const daysSince = (dateStr) => {
+    if (!dateStr) return "-";
+    const diffMs = Date.now() - new Date(dateStr).getTime();
+    return Math.floor(diffMs / (1000*60*60*24)) + "日";
+  };
+
+  // 履歴更新
+  function updateDataList() {
+    dataListEl.innerHTML = "";
+    // 最新3件表示（重複なし）
+    const uniqueHist = [...new Set(history)].slice(-3).reverse();
+    uniqueHist.forEach(word => {
+      const option = document.createElement("option");
+      option.value = word;
+      dataListEl.appendChild(option);
+    });
+  }
+
+  // 保存処理
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allTabsData));
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    localStorage.setItem(TAB_INDEX_KEY, currentTab);
+  }
+
+  // 読込処理
+  function loadData() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    allTabsData = stored ? JSON.parse(stored) : {0: [], 1: [], 2: []};
+    const storedHist = localStorage.getItem(HISTORY_KEY);
+    history = storedHist ? JSON.parse(storedHist) : [];
+    const storedTab = localStorage.getItem(TAB_INDEX_KEY);
+    currentTab = storedTab !== null ? Number(storedTab) : 0;
+    if (!(currentTab in allTabsData)) currentTab = 0;
+  }
+
+  // リスト再描画
+  function renderList() {
+    listEl.innerHTML = "";
+    const items = allTabsData[currentTab] || [];
+
+    items.forEach((item, idx) => {
+      const li = document.createElement("li");
+      li.dataset.index = idx;
+
+      const purchaseShort = formatDate(item.purchaseDate);
+      const daysFromPurchase = daysSince(item.purchaseDate);
+      const prevShort = formatDate(item.previousPurchaseDate);
+      const daysFromPrev = daysSince(item.previousPurchaseDate);
+
+      li.innerHTML = `
+        <div class="item-main">
+          <input type="checkbox" aria-label="完了チェック" ${item.checked ? "checked" : ""}>
+          <span contenteditable="true" aria-label="項目名">${item.text}</span>
+          <small>購入日: ${purchaseShort} (${daysFromPurchase})</small>
+          <button class="toggle-detail" aria-label="詳細表示切替">▼</button>
+          <button class="delete-btn" aria-label="削除">削除</button>
+        </div>
+        <div class="item-detail" style="display:none;">
+          <small>前回購入日: ${prevShort} (${daysFromPrev})</small>
+        </div>
+      `;
+
+      // チェックボックス
+      li.querySelector('input[type="checkbox"]').addEventListener("change", (e) => {
+        if (e.target.checked) {
+          item.checked = true;
+          const today = new Date().toISOString();
+          item.previousPurchaseDate = item.purchaseDate || "";
+          item.purchaseDate = today;
+        } else {
+          item.checked = false;
+        }
+        saveData();
+        renderList();
+      });
+
+      // 項目編集
+      const spanEl = li.querySelector("span[contenteditable]");
+      spanEl.addEventListener("input", () => {
+        const newText = spanEl.textContent.trim();
+        if (!newText) return; // 空白は無視
+        item.text = newText;
+        saveData();
+      });
+
+      // 詳細表示切替
+      const toggleBtn = li.querySelector("button.toggle-detail");
+      const detailDiv = li.querySelector(".item-detail");
+      toggleBtn.addEventListener("click", () => {
+        if (detailDiv.style.display === "none") {
+          detailDiv.style.display = "block";
+          toggleBtn.textContent = "▲";
+        } else {
+          detailDiv.style.display = "none";
+          toggleBtn.textContent = "▼";
+        }
+      });
+
+      // 削除ボタン
+      li.querySelector("button.delete-btn").addEventListener("click", () => {
+        allTabsData[currentTab].splice(idx, 1);
+        saveData();
+        renderList();
+      });
+
+      listEl.appendChild(li);
+    });
+  }
+
+  // 項目追加
+  function addItem(text) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+
+    // 重複チェック
+    const exists = allTabsData[currentTab].some(i => i.text === trimmed);
+    if (exists) return;
+
+    // 新規追加
+    const newItem = {
+      text: trimmed,
+      checked: false,
+      purchaseDate: "",
+      previousPurchaseDate: ""
+    };
+    allTabsData[currentTab].push(newItem);
+
+    // 履歴更新
+    history = history.filter(w => w !== trimmed);
+    history.push(trimmed);
+    if (history.length > 10) history.shift();
+    updateDataList();
+
+    saveData();
+    renderList();
+
+    inputEl.value = "";
+    inputEl.focus();
+  }
+
+  // チェック済み削除
+  function deleteChecked() {
+    allTabsData[currentTab] = allTabsData[currentTab].filter(i => !i.checked);
+    saveData();
+    renderList();
+  }
+
+  // 全削除
+  function clearAll() {
+    if (!confirm("本当にこのタブの項目をすべて削除しますか？")) return;
+    allTabsData[currentTab] = [];
+    saveData();
+    renderList();
+  }
+
+  // タブ切替
+  tabs.forEach((tabEl, i) => {
+    tabEl.addEventListener("click", () => {
+      tabs.forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("tabindex", "-1");
+        t.setAttribute("aria-selected", "false");
+      });
+      tabEl.classList.add("active");
+      tabEl.setAttribute("tabindex", "0");
+      tabEl.setAttribute("aria-selected", "true");
+      currentTab = i;
+      saveData();
+      renderList();
+    });
+  });
+
+  // 追加ボタンクリック
+  addBtn.addEventListener("click", () => {
+    addItem(inputEl.value);
+  });
+
+  // エンターキーで追加
+  inputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addItem(inputEl.value);
+    }
+  });
+
+  // 初期化
+  function init() {
+    loadData();
+
+    // タブの状態調整
+    tabs.forEach((tabEl, i) => {
+      if (i === currentTab) {
+        tabEl.classList.add("active");
+        tabEl.setAttribute("tabindex", "0");
+        tabEl.setAttribute("aria-selected", "true");
+      } else {
+        tabEl.classList.remove("active");
+        tabEl.setAttribute("tabindex", "-1");
+        tabEl.setAttribute("aria-selected", "false");
+      }
+    });
+
+    updateDataList();
+    renderList();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
