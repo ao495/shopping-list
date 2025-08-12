@@ -1,440 +1,260 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8" />
-<title>買い物チェックリスト（タブ＆購入履歴付き）</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<title>ショッピングリスト</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body {
-    font-family: sans-serif;
-    margin: 20px;
-    background: #f4f4f9;
-  }
-  .container {
-    max-width: 600px;
-    margin: auto;
-    background: #fff;
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
-  }
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .tab {
-    flex-grow: 1;
-    padding: 10px 0;
-    text-align: center;
-    background: #eee;
-    border-radius: 6px;
-    cursor: pointer;
-    user-select: none;
-    font-weight: 600;
-    color: #444;
-    transition: background 0.3s, color 0.3s;
-  }
-  .tab.active {
-    background: #3498db;
-    color: #fff;
-  }
-  .input-area {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  #itemInput {
-    flex-grow: 1;
-    padding: 8px 12px;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-  #addBtn {
-    background: #2ecc71;
-    border: none;
-    color: white;
-    font-weight: 700;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  #addBtn:hover {
-    background: #27ae60;
-  }
-  ul#list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  ul#list li {
-    background: #fff;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-    margin-bottom: 8px;
-    padding: 10px 12px;
-  }
-  .item-main {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .item-main > input[type="checkbox"] {
-    order: 0;
-    flex-shrink: 0;
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-  }
-  .item-main > span {
-    order: 1;
-    flex-grow: 1;
-    margin-left: 10px;
-    user-select: text;
-    outline-offset: 2px;
-  }
-  .item-main > small {
-    order: 2;
-    white-space: nowrap;
-    font-size: 0.8rem;
-    color: #555;
-    margin-left: 10px;
-    flex-shrink: 0;
-  }
-  .item-main > button.toggle-detail {
-    order: 3;
-    background: transparent;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    user-select: none;
-    flex-shrink: 0;
-  }
-  .item-main > button.delete-btn {
-    order: 4;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 4px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-    user-select: none;
-    transition: background-color 0.2s;
-  }
-  .item-main > button.delete-btn:hover {
-    background: #c0392b;
-  }
-  .item-detail {
-    padding-left: 34px;
-    font-size: 0.75rem;
-    color: #555;
-    margin-top: 4px;
-    user-select: none;
-  }
-  .btn-group {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    justify-content: flex-end;
-  }
-  .btn-group button {
-    padding: 6px 14px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s;
-  }
-  #deleteCheckedBtn {
-    background: #f1c40f;
-    color: #000;
-  }
-  #deleteCheckedBtn:hover {
-    background: #d4ac0d;
-  }
-  #clearBtn {
-    background: #e74c3c;
-    color: white;
-  }
-  #clearBtn:hover {
-    background: #c0392b;
-  }
-  /* スマホなど狭い画面で文字折返し対応 */
-  @media (max-width: 480px) {
-    .item-main > small {
-      display: none;
-    }
-  }
+body { font-family: sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
+header { background: #2196f3; color: white; padding: 10px; text-align: center; }
+.tabs { display: flex; background: #eee; }
+.tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { border-bottom: 2px solid #2196f3; font-weight: bold; background: white; }
+.container { padding: 10px; }
+.input-area { position: relative; margin-bottom: 10px; }
+input[type="text"] { width: calc(100% - 12px); padding: 8px; font-size: 16px; box-sizing: border-box; }
+ul { list-style: none; padding: 0; margin: 0; }
+li { background: white; margin: 5px 0; padding: 8px; display: flex; align-items: center; justify-content: space-between; border-radius: 5px; }
+.item-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
+.item-left span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.delete-btn { background: #f44336; color: white; border: none; padding: 6px 10px; cursor: pointer; border-radius: 3px; flex-shrink: 0; }
+.date-info { font-size: 12px; color: #666; margin-left: 8px; white-space: nowrap; }
+.suggestions { background: white; border: 1px solid #ccc; margin-top: 2px; position: absolute; z-index: 1000; width: calc(100% - 12px); display: none; max-height: 140px; overflow: auto; }
+.suggestions div { padding: 6px; cursor: pointer; }
+.suggestions div:hover { background: #eee; }
+.btn-group { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+.btn { padding: 8px 12px; border-radius:6px; border:none; cursor:pointer; font-weight:600; }
+.btn-warning { background:#f1c40f; color:#000; }
+.btn-danger { background:#e74c3c; color:#fff; }
+@media (max-width:480px){
+  .date-info { display:none; }
+}
 </style>
 </head>
 <body>
-<div class="container" role="main" aria-label="買い物チェックリスト">
-  <nav class="tabs" role="tablist" aria-label="買い物リストタブ">
-    <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="panel-0" id="tab-0">買い物リスト</div>
-    <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-1" id="tab-1">必要なもの</div>
-    <div class="tab" role="tab" tabindex="-1" aria-selected="false" aria-controls="panel-2" id="tab-2">その他</div>
-  </nav>
 
+<header>
+  <h1>ショッピングリスト</h1>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="list1">買い物リスト</div>
+  <div class="tab" data-tab="list2">必要なもの</div>
+  <div class="tab" data-tab="list3">その他</div>
+</div>
+
+<div class="container">
   <div class="input-area">
-    <input id="itemInput" type="text" list="historyList" placeholder="項目を入力" aria-label="項目入力" autocomplete="off" />
-    <datalist id="historyList"></datalist>
-    <button id="addBtn" aria-label="項目追加">追加</button>
+    <input type="text" id="itemInput" placeholder="商品名を入力..." autocomplete="off">
+    <div id="suggestions" class="suggestions"></div>
   </div>
 
-  <ul id="list" role="list" aria-label="現在の買い物リスト"></ul>
+  <ul id="list1" class="list"></ul>
+  <ul id="list2" class="list" style="display:none;"></ul>
+  <ul id="list3" class="list" style="display:none;"></ul>
 
   <div class="btn-group">
-    <button id="deleteCheckedBtn" aria-label="チェック済み項目削除">✔️ チェック済み削除</button>
-    <button id="clearBtn" aria-label="全項目削除">全削除</button>
+    <button id="deleteCheckedBtn" class="btn btn-warning" aria-label="チェック済み削除">✔️ チェック済み削除</button>
+    <button id="clearBtn" class="btn btn-danger" aria-label="全削除">全削除</button>
   </div>
 </div>
 
 <script>
-(() => {
-  const tabs = document.querySelectorAll(".tab");
-  const listEl = document.getElementById("list");
-  const inputEl = document.getElementById("itemInput");
-  const addBtn = document.getElementById("addBtn");
-  const deleteCheckedBtn = document.getElementById("deleteCheckedBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const dataListEl = document.getElementById("historyList");
+/* ---- 初期設定 ---- */
+const tabs = document.querySelectorAll('.tab');
+const lists = document.querySelectorAll('.list');
+const input = document.getElementById('itemInput');
+const suggestions = document.getElementById('suggestions');
+const deleteCheckedBtn = document.getElementById('deleteCheckedBtn');
+const clearBtn = document.getElementById('clearBtn');
 
-  let currentTab = 0;
+let activeListId = 'list1';
 
-  // 各タブのデータ配列格納用オブジェクト
-  // 形式: {0: [...], 1: [...], 2: [...]}
-  let allTabsData = {};
-  // 履歴ワード配列
-  let history = [];
-
-  // 保存先キー名
-  const STORAGE_KEY = "shoppingListTabsData_v3";
-  const HISTORY_KEY = "shoppingListHistory_v3";
-  const TAB_INDEX_KEY = "shoppingListCurrentTab_v3";
-
-  // 日付フォーマット
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const d = new Date(dateStr);
-    return `${d.getMonth()+1}/${d.getDate()}`;
-  };
-
-  // 経過日数計算
-  const daysSince = (dateStr) => {
-    if (!dateStr) return "-";
-    const diffMs = Date.now() - new Date(dateStr).getTime();
-    return Math.floor(diffMs / (1000*60*60*24)) + "日";
-  };
-
-  // 履歴更新
-  function updateDataList() {
-    dataListEl.innerHTML = "";
-    // 最新3件表示（重複なし）
-    const uniqueHist = [...new Set(history)].slice(-3).reverse();
-    uniqueHist.forEach(word => {
-      const option = document.createElement("option");
-      option.value = word;
-      dataListEl.appendChild(option);
-    });
-  }
-
-  // 保存処理
-  function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(allTabsData));
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-    localStorage.setItem(TAB_INDEX_KEY, currentTab);
-  }
-
-  // 読込処理
-  function loadData() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    allTabsData = stored ? JSON.parse(stored) : {0: [], 1: [], 2: []};
-    const storedHist = localStorage.getItem(HISTORY_KEY);
-    history = storedHist ? JSON.parse(storedHist) : [];
-    const storedTab = localStorage.getItem(TAB_INDEX_KEY);
-    currentTab = storedTab !== null ? Number(storedTab) : 0;
-    if (!(currentTab in allTabsData)) currentTab = 0;
-  }
-
-  // リスト再描画
-  function renderList() {
-    listEl.innerHTML = "";
-    const items = allTabsData[currentTab] || [];
-
-    items.forEach((item, idx) => {
-      const li = document.createElement("li");
-      li.dataset.index = idx;
-
-      const purchaseShort = formatDate(item.purchaseDate);
-      const daysFromPurchase = daysSince(item.purchaseDate);
-      const prevShort = formatDate(item.previousPurchaseDate);
-      const daysFromPrev = daysSince(item.previousPurchaseDate);
-
-      li.innerHTML = `
-        <div class="item-main">
-          <input type="checkbox" aria-label="完了チェック" ${item.checked ? "checked" : ""}>
-          <span contenteditable="true" aria-label="項目名">${item.text}</span>
-          <small>購入日: ${purchaseShort} (${daysFromPurchase})</small>
-          <button class="toggle-detail" aria-label="詳細表示切替">▼</button>
-          <button class="delete-btn" aria-label="削除">削除</button>
-        </div>
-        <div class="item-detail" style="display:none;">
-          <small>前回購入日: ${prevShort} (${daysFromPrev})</small>
-        </div>
-      `;
-
-      // チェックボックス
-      li.querySelector('input[type="checkbox"]').addEventListener("change", (e) => {
-        if (e.target.checked) {
-          item.checked = true;
-          const today = new Date().toISOString();
-          item.previousPurchaseDate = item.purchaseDate || "";
-          item.purchaseDate = today;
-        } else {
-          item.checked = false;
-        }
-        saveData();
-        renderList();
-      });
-
-      // 項目編集
-      const spanEl = li.querySelector("span[contenteditable]");
-      spanEl.addEventListener("input", () => {
-        const newText = spanEl.textContent.trim();
-        if (!newText) return; // 空白は無視
-        item.text = newText;
-        saveData();
-      });
-
-      // 詳細表示切替
-      const toggleBtn = li.querySelector("button.toggle-detail");
-      const detailDiv = li.querySelector(".item-detail");
-      toggleBtn.addEventListener("click", () => {
-        if (detailDiv.style.display === "none") {
-          detailDiv.style.display = "block";
-          toggleBtn.textContent = "▲";
-        } else {
-          detailDiv.style.display = "none";
-          toggleBtn.textContent = "▼";
-        }
-      });
-
-      // 削除ボタン
-      li.querySelector("button.delete-btn").addEventListener("click", () => {
-        allTabsData[currentTab].splice(idx, 1);
-        saveData();
-        renderList();
-      });
-
-      listEl.appendChild(li);
-    });
-  }
-
-  // 項目追加
-  function addItem(text) {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-
-    // 重複チェック
-    const exists = allTabsData[currentTab].some(i => i.text === trimmed);
-    if (exists) return;
-
-    // 新規追加
-    const newItem = {
-      text: trimmed,
-      checked: false,
-      purchaseDate: "",
-      previousPurchaseDate: ""
-    };
-    allTabsData[currentTab].push(newItem);
-
-    // 履歴更新
-    history = history.filter(w => w !== trimmed);
-    history.push(trimmed);
-    if (history.length > 10) history.shift();
-    updateDataList();
-
-    saveData();
-    renderList();
-
-    inputEl.value = "";
-    inputEl.focus();
-  }
-
-  // チェック済み削除
-  function deleteChecked() {
-    allTabsData[currentTab] = allTabsData[currentTab].filter(i => !i.checked);
-    saveData();
-    renderList();
-  }
-
-  // 全削除
-  function clearAll() {
-    if (!confirm("本当にこのタブの項目をすべて削除しますか？")) return;
-    allTabsData[currentTab] = [];
-    saveData();
-    renderList();
-  }
-
-  // タブ切替
-  tabs.forEach((tabEl, i) => {
-    tabEl.addEventListener("click", () => {
-      tabs.forEach(t => {
-        t.classList.remove("active");
-        t.setAttribute("tabindex", "-1");
-        t.setAttribute("aria-selected", "false");
-      });
-      tabEl.classList.add("active");
-      tabEl.setAttribute("tabindex", "0");
-      tabEl.setAttribute("aria-selected", "true");
-      currentTab = i;
-      saveData();
-      renderList();
-    });
+/* タブ切替 */
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    lists.forEach(l => l.style.display = 'none');
+    document.getElementById(tab.dataset.tab).style.display = 'block';
+    activeListId = tab.dataset.tab;
+    input.focus();
+    renderList(activeListId);
   });
+});
 
-  // 追加ボタンクリック
-  addBtn.addEventListener("click", () => {
-    addItem(inputEl.value);
-  });
+/* ローカルストレージ用の読込／保存 */
+function loadList(listId) {
+  return JSON.parse(localStorage.getItem(listId) || '[]');
+}
+function saveList(listId, items) {
+  localStorage.setItem(listId, JSON.stringify(items));
+}
 
-  // エンターキーで追加
-  inputEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addItem(inputEl.value);
-    }
-  });
+/* リスト描画（指定タブのみ） */
+function renderList(listId) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  const items = loadList(listId);
+  items.forEach((item, index) => {
+    const li = document.createElement('li');
 
-  // 初期化
-  function init() {
-    loadData();
+    const left = document.createElement('div');
+    left.className = 'item-left';
 
-    // タブの状態調整
-    tabs.forEach((tabEl, i) => {
-      if (i === currentTab) {
-        tabEl.classList.add("active");
-        tabEl.setAttribute("tabindex", "0");
-        tabEl.setAttribute("aria-selected", "true");
-      } else {
-        tabEl.classList.remove("active");
-        tabEl.setAttribute("tabindex", "-1");
-        tabEl.setAttribute("aria-selected", "false");
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = !!item.checked;
+    checkbox.addEventListener('change', () => {
+      item.checked = checkbox.checked;
+      if (checkbox.checked) {
+        item.lastPurchased = new Date().toISOString();
       }
+      saveList(listId, items);
+      renderList(listId);
     });
 
-    updateDataList();
-    renderList();
+    const text = document.createElement('span');
+    text.textContent = item.name;
+    text.title = item.name;
+    // 編集可能にする（任意）
+    text.contentEditable = true;
+    text.addEventListener('input', () => {
+      item.name = text.textContent.trim();
+      saveList(listId, items);
+    });
+
+    const dateInfo = document.createElement('div');
+    dateInfo.className = 'date-info';
+    if (item.lastPurchased) {
+      const d = new Date(item.lastPurchased);
+      dateInfo.textContent = `前回: ${d.getMonth()+1}/${d.getDate()}`;
+    } else {
+      dateInfo.textContent = '';
+    }
+
+    left.appendChild(checkbox);
+    left.appendChild(text);
+    left.appendChild(dateInfo);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.textContent = '削除';
+    delBtn.addEventListener('click', () => {
+      items.splice(index, 1);
+      saveList(listId, items);
+      renderList(listId);
+    });
+
+    li.appendChild(left);
+    li.appendChild(delBtn);
+    list.appendChild(li);
+  });
+}
+
+/* 履歴（サジェスト） */
+function getHistory() {
+  return JSON.parse(localStorage.getItem('history') || '[]');
+}
+function saveHistory(name) {
+  let hist = getHistory();
+  hist = hist.filter(h => h !== name);
+  hist.unshift(name);
+  if (hist.length > 3) hist = hist.slice(0,3);
+  localStorage.setItem('history', JSON.stringify(hist));
+  updateSuggestions();
+}
+function updateSuggestions() {
+  const hist = getHistory();
+  suggestions.innerHTML = '';
+  hist.forEach(h => {
+    const div = document.createElement('div');
+    div.textContent = h;
+    div.addEventListener('click', () => {
+      addItem(h);
+      suggestions.style.display = 'none';
+    });
+    suggestions.appendChild(div);
+  });
+}
+
+/* サジェスト表示 */
+input.addEventListener('input', () => {
+  const v = input.value.trim();
+  if (!v) {
+    suggestions.style.display = 'none';
+    return;
   }
-  init();
-})();
+  const hist = getHistory().filter(h => h.includes(v));
+  suggestions.innerHTML = '';
+  if (hist.length) {
+    hist.forEach(h => {
+      const div = document.createElement('div');
+      div.textContent = h;
+      div.addEventListener('click', () => {
+        addItem(h);
+        suggestions.style.display = 'none';
+      });
+      suggestions.appendChild(div);
+    });
+    suggestions.style.display = 'block';
+  } else {
+    suggestions.style.display = 'none';
+  }
+});
+
+/* Enterで追加 */
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && input.value.trim()) {
+    addItem(input.value.trim());
+    suggestions.style.display = 'none';
+  }
+});
+
+/* 追加処理 */
+function addItem(name) {
+  if (!name) return;
+  const items = loadList(activeListId);
+  // 重複チェック（任意）
+  if (items.some(i => i.name === name)) {
+    input.value = '';
+    input.focus();
+    return;
+  }
+  items.push({ name, checked: false, lastPurchased: null });
+  saveList(activeListId, items);
+  saveHistory(name);
+  input.value = '';
+  renderList(activeListId);
+}
+
+/* ---- ここが今回の追加関数 ---- */
+
+/* チェック済み削除（active tab の checked=true を削除） */
+function deleteChecked() {
+  const items = loadList(activeListId);
+  const filtered = items.filter(i => !i.checked);
+  // 何も削除がなければ何もしない
+  if (filtered.length === items.length) return;
+  saveList(activeListId, filtered);
+  renderList(activeListId);
+}
+
+/* 全削除（確認あり） */
+function clearAll() {
+  if (!confirm('本当にこのタブの項目をすべて削除しますか？')) return;
+  saveList(activeListId, []);
+  renderList(activeListId);
+}
+
+/* イベント紐付け */
+deleteCheckedBtn.addEventListener('click', deleteChecked);
+clearBtn.addEventListener('click', clearAll);
+
+/* 初期描画 */
+updateSuggestions();
+['list1','list2','list3'].forEach(renderList);
 </script>
+
 </body>
 </html>
-
