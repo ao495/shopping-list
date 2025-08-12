@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>処方終了日計算アプリ</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for error icon -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes bounceIn {
+            0%,
+            20%,
+            40%,
+            60%,
+            80%,
+            100% {
+                transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+            }
+            0% {
+                opacity: 0;
+                transform: scale3d(0.3, 0.3, 0.3);
+            }
+            20% {
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+            40% {
+                transform: scale3d(0.9, 0.9, 0.9);
+            }
+            60% {
+                opacity: 1;
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+            80% {
+                transform: scale3d(0.97, 0.97, 0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        .animate-bounceIn {
+            animation: bounceIn 0.8s;
+        }
+
+        .writing-mode-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            padding-right: 0.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4">
+    <div
+        class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md mx-auto space-y-6"
+    >
+        <div class="space-y-4">
+            <div class="flex items-center">
+                <label
+                    for="startDateInput"
+                    id="startDateLabel"
+                    class="flex-shrink-0 text-gray-700 font-semibold text-lg cursor-pointer writing-mode-vertical"
+                    >開始日</label
+                >
+                <input
+                    type="date"
+                    id="startDateInput"
+                    class="flex-grow w-full h-[48px] p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm text-center"
+                    aria-describedby="startDateHelp"
+                />
+            </div>
+            <p
+                id="startDateHelp"
+                class="text-xs text-gray-400 mb-4 text-center"
+            >
+                処方開始日を選択してください
+            </p>
+
+            <div class="flex items-center relative">
+                <label
+                    for="daysInput"
+                    class="flex-shrink-0 text-gray-700 font-semibold text-lg writing-mode-vertical"
+                    >日数</label
+                >
+                <div class="flex-grow w-full relative">
+                    <input
+                        type="number"
+                        id="daysInput"
+                        placeholder="例: 30"
+                        min="0"
+                        step="1"
+                        class="w-full h-[48px] p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm text-center"
+                        aria-describedby="daysHelp"
+                        inputmode="numeric"
+                    />
+                    <p
+                        id="daysHelp"
+                        class="text-xs text-gray-400 mt-1 text-center select-none"
+                    >
+                        日数は0以上の整数を入力してください。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="resultDisplay"
+            class="bg-gray-100 p-4 rounded-lg text-center text-gray-800 text-xl font-semibold border border-gray-200 shadow-inner flex items-center justify-center whitespace-nowrap overflow-hidden"
+            aria-live="polite"
+        ></div>
+
+        <div
+            id="errorMessage"
+            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden flex items-center justify-center"
+            role="alert"
+            aria-live="assertive"
+        >
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <span></span>
+        </div>
+
+        <button
+            id="resetButton"
+            class="w-full h-[48px] bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-transform duration-200 transform hover:scale-105 shadow"
+        >
+            リセット
+        </button>
+
+        <div
+            class="flex items-center justify-center text-gray-700 font-medium"
+        >
+            <label
+                class="inline-flex items-center cursor-not-allowed opacity-70"
+            >
+                <input
+                    type="checkbox"
+                    id="includeStartDate"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded-md border-gray-300"
+                    checked
+                    disabled
+                />
+                <span class="ml-2 text-lg">処方開始日を含める</span>
+            </label>
+        </div>
+
+        <hr class="border-gray-200 my-6" />
+
+        <h1
+            class="text-3xl font-extrabold text-gray-800 text-center mb-6"
+        >
+            薬の処方終了日計算
+        </h1>
+        <div
+            class="bg-blue-50 p-4 rounded-lg text-blue-800 border border-blue-200 text-sm mt-6"
+        >
+            <p class="font-bold mb-2">このアプリについて</p>
+            <p>
+                処方開始日と処方日数を入力することで、お薬の処方終了日を簡単に計算できます。
+            </p>
+            <p class="mt-2">
+                「処方開始日を含める」が常に有効なので、処方開始日を1日目として日数をカウントします。
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startDateInput = document.getElementById('startDateInput');
+            const daysInput = document.getElementById('daysInput');
+            const resultDisplay = document.getElementById('resultDisplay');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorMessageText = errorMessage.querySelector('span');
+            const resetButton = document.getElementById('resetButton');
+            const startDateLabel = document.getElementById('startDateLabel');
+
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            function setInitialDate() {
+                const today = new Date();
+                startDateInput.value = formatDate(today);
+                daysInput.value = '';
+                resultDisplay.textContent = '';
+                errorMessage.classList.add('hidden');
+                errorMessageText.textContent = '';
+                resultDisplay.classList.remove('bg-yellow-100');
+                resultDisplay.classList.add('bg-gray-100');
+                calculateDate();
+            }
+
+            function validateDays(value) {
+                const num = Number(value);
+                return Number.isInteger(num) && num >= 0;
+            }
+
+            function calculateDate() {
+                errorMessage.classList.add('hidden');
+                errorMessageText.textContent = '';
+
+                const startDateString = startDateInput.value;
+                const daysValue = daysInput.value.trim();
+
+                if (startDateString === '' || daysValue === '') {
+                    resultDisplay.textContent = '';
+                    resultDisplay.classList.remove('bg-yellow-100');
+                    resultDisplay.classList.add('bg-gray-100');
+                    return;
+                }
+
+                if (!validateDays(daysValue)) {
+                    resultDisplay.textContent = '';
+                    errorMessageText.textContent = '日数は0以上の整数で入力してください。';
+                    errorMessage.classList.remove('hidden');
+                    resultDisplay.classList.remove('bg-yellow-100');
+                    resultDisplay.classList.add('bg-gray-100');
+                    return;
+                }
+
+                const daysToAdd = parseInt(daysValue, 10);
+                const startDate = new Date(startDateString);
+
+                if (startDate.toString() === 'Invalid Date') {
+                    resultDisplay.textContent = '';
+                    errorMessageText.textContent =
+                        '開始日が無効です。正しい日付を選択してください。';
+                    errorMessage.classList.remove('hidden');
+                    resultDisplay.classList.remove('bg-yellow-100');
+                    resultDisplay.classList.add('bg-gray-100');
+                    return;
+                }
+
+                const originalStartMonth = startDate.getMonth() + 1;
+                const originalStartDay = startDate.getDate();
+
+                let adjustedDays = daysToAdd > 0 ? daysToAdd - 1 : 0;
+                startDate.setDate(startDate.getDate() + adjustedDays);
+
+                const resultMonth = startDate.getMonth() + 1;
+                const resultDay = startDate.getDate();
+
+                resultDisplay.textContent = `${originalStartMonth}/${originalStartDay} ～ ${resultMonth}/${resultDay}`;
+                resultDisplay.classList.remove('animate-bounceIn', 'bg-gray-100');
+                void resultDisplay.offsetWidth;
+                resultDisplay.classList.add('animate-bounceIn', 'bg-yellow-100');
+            }
+
+            function attachEventListeners() {
+                startDateInput.addEventListener('change', () => {
+                    daysInput.value = '';
+                    daysInput.focus();
+                    daysInput.select();
+                    errorMessage.classList.add('hidden');
+                    errorMessageText.textContent = '';
+                    resultDisplay.textContent = '';
+                    resultDisplay.classList.remove('bg-yellow-100');
+                    resultDisplay.classList.add('bg-gray-100');
+                });
+
+                daysInput.addEventListener('input', () => {
+                    errorMessage.classList.add('hidden');
+                    errorMessageText.textContent = '';
+                    calculateDate();
+                });
+
+                daysInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        calculateDate();
+                    }
+                });
+
+                resetButton.addEventListener('click', () => {
+                    setInitialDate();
+                    errorMessage.classList.add('hidden');
+                    errorMessageText.textContent = '';
+                });
+
+                startDateLabel.addEventListener('click', () => {
+                    startDateInput.focus();
+                });
+            }
+
+            setInitialDate();
+            attachEventListeners();
+        });
+    </script>
+</body>
+</html>
