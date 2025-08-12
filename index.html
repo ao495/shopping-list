@@ -2,103 +2,169 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ショッピングリスト</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 1em; }
-  h1 { text-align: center; }
-  .item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 0.5em 0; }
-  .left { display: flex; align-items: center; gap: 0.5em; }
-  button { background-color: #ff4d4d; border: none; padding: 0.3em 0.6em; color: white; border-radius: 5px; cursor: pointer; }
-  button:hover { background-color: #e60000; }
-  input[type=text] { width: 100%; padding: 0.5em; margin-bottom: 0.5em; }
-  select { padding: 0.3em; margin-bottom: 0.5em; }
+body { font-family: sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
+header { background: #2196f3; color: white; padding: 10px; text-align: center; }
+.tabs { display: flex; background: #eee; }
+.tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; }
+.tab.active { border-bottom: 2px solid #2196f3; font-weight: bold; background: white; }
+.container { padding: 10px; }
+input[type="text"] { width: calc(100% - 20px); padding: 8px; font-size: 16px; }
+ul { list-style: none; padding: 0; }
+li { background: white; margin: 5px 0; padding: 8px; display: flex; align-items: center; justify-content: space-between; border-radius: 5px; }
+.item-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+.delete-btn { background: #f44336; color: white; border: none; padding: 4px 8px; cursor: pointer; border-radius: 3px; }
+.date-info { font-size: 12px; color: #666; }
+.suggestions { background: white; border: 1px solid #ccc; margin-top: 2px; position: absolute; z-index: 1000; width: calc(100% - 22px); }
+.suggestions div { padding: 5px; cursor: pointer; }
+.suggestions div:hover { background: #eee; }
 </style>
 </head>
 <body>
 
-<h1>ショッピングリスト</h1>
-<input type="text" id="itemInput" placeholder="商品を入力してEnter">
-<select id="historySelect"></select>
-<div id="list"></div>
+<header>
+  <h1>ショッピングリスト</h1>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="list1">買い物リスト</div>
+  <div class="tab" data-tab="list2">必要なもの</div>
+  <div class="tab" data-tab="list3">その他</div>
+</div>
+
+<div class="container">
+  <input type="text" id="itemInput" placeholder="商品名を入力..." autocomplete="off">
+  <div id="suggestions" class="suggestions" style="display:none;"></div>
+  <ul id="list1" class="list"></ul>
+  <ul id="list2" class="list" style="display:none;"></ul>
+  <ul id="list3" class="list" style="display:none;"></ul>
+</div>
 
 <script>
+const tabs = document.querySelectorAll('.tab');
+const lists = document.querySelectorAll('.list');
 const input = document.getElementById('itemInput');
-const list = document.getElementById('list');
-const historySelect = document.getElementById('historySelect');
+const suggestions = document.getElementById('suggestions');
+let activeListId = 'list1';
 
-let items = JSON.parse(localStorage.getItem('items') || '[]');
-let history = JSON.parse(localStorage.getItem('history') || '[]');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    lists.forEach(l => l.style.display = 'none');
+    document.getElementById(tab.dataset.tab).style.display = 'block';
+    activeListId = tab.dataset.tab;
+    input.focus();
+  });
+});
 
-function save() {
-  localStorage.setItem('items', JSON.stringify(items));
-  localStorage.setItem('history', JSON.stringify(history.slice(0, 3))); // 履歴は3件
+function loadList(listId) {
+  return JSON.parse(localStorage.getItem(listId) || '[]');
 }
 
-function render() {
+function saveList(listId, items) {
+  localStorage.setItem(listId, JSON.stringify(items));
+}
+
+function renderList(listId) {
+  const list = document.getElementById(listId);
   list.innerHTML = '';
+  const items = loadList(listId);
   items.forEach((item, index) => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <div class="left">
-        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck(${index})">
-        <span>${item.name}</span>
-      </div>
-      <button onclick="removeItem(${index})">削除</button>
-    `;
-    list.appendChild(div);
+    const li = document.createElement('li');
+    const left = document.createElement('div');
+    left.className = 'item-left';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = item.checked || false;
+    checkbox.addEventListener('change', () => {
+      item.checked = checkbox.checked;
+      if (checkbox.checked) {
+        item.lastPurchased = new Date().toLocaleDateString();
+      }
+      saveList(listId, items);
+      renderList(listId);
+    });
+    const text = document.createElement('span');
+    text.textContent = item.name;
+    const dateInfo = document.createElement('div');
+    dateInfo.className = 'date-info';
+    if (item.lastPurchased) {
+      dateInfo.textContent = `前回購入日: ${item.lastPurchased}`;
+    }
+    left.appendChild(checkbox);
+    left.appendChild(text);
+    left.appendChild(dateInfo);
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.textContent = '削除';
+    delBtn.addEventListener('click', () => {
+      items.splice(index, 1);
+      saveList(listId, items);
+      renderList(listId);
+    });
+
+    li.appendChild(left);
+    li.appendChild(delBtn);
+    list.appendChild(li);
   });
-  renderHistory();
 }
 
-function renderHistory() {
-  historySelect.innerHTML = '<option value="">過去の履歴から選択</option>';
-  history.forEach(h => {
-    const opt = document.createElement('option');
-    opt.value = h;
-    opt.textContent = h;
-    historySelect.appendChild(opt);
-  });
+function getHistory() {
+  return JSON.parse(localStorage.getItem('history') || '[]');
 }
 
-function addItem(name) {
-  if (!name) return;
-  items.push({ name, checked: false });
-  if (!history.includes(name)) {
-    history.unshift(name);
+function saveHistory(name) {
+  let history = getHistory();
+  history = history.filter(item => item !== name);
+  history.unshift(name);
+  if (history.length > 3) history = history.slice(0, 3);
+  localStorage.setItem('history', JSON.stringify(history));
+}
+
+function showSuggestions(value) {
+  const history = getHistory().filter(h => h.includes(value) && value);
+  if (history.length > 0) {
+    suggestions.innerHTML = '';
+    history.forEach(h => {
+      const div = document.createElement('div');
+      div.textContent = h;
+      div.addEventListener('click', () => {
+        addItem(h);
+        suggestions.style.display = 'none';
+      });
+      suggestions.appendChild(div);
+    });
+    suggestions.style.display = 'block';
+  } else {
+    suggestions.style.display = 'none';
   }
-  save();
-  render();
 }
 
-function toggleCheck(index) {
-  items[index].checked = !items[index].checked;
-  save();
-  render();
-}
-
-function removeItem(index) {
-  items.splice(index, 1);
-  save();
-  render();
-}
+input.addEventListener('input', () => {
+  showSuggestions(input.value.trim());
+});
 
 input.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' && input.value.trim()) {
     addItem(input.value.trim());
-    input.value = '';
+    suggestions.style.display = 'none';
   }
 });
 
-historySelect.addEventListener('change', () => {
-  if (historySelect.value) {
-    addItem(historySelect.value);
-    historySelect.value = '';
-  }
-});
+function addItem(name) {
+  const items = loadList(activeListId);
+  items.push({ name, checked: false, lastPurchased: null });
+  saveList(activeListId, items);
+  saveHistory(name);
+  input.value = '';
+  renderList(activeListId);
+}
 
-render();
+['list1', 'list2', 'list3'].forEach(renderList);
 </script>
 
 </body>
