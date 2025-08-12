@@ -1,41 +1,174 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>ショッピングリスト</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-body { font-family: sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
-header { background: #2196f3; color: white; padding: 10px; text-align: center; }
-.tabs { display: flex; background: #eee; }
-.tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; }
-.tab.active { border-bottom: 2px solid #2196f3; font-weight: bold; background: white; }
-.container { padding: 10px; }
-.input-area { position: relative; margin-bottom: 10px; }
-input[type="text"] { width: calc(100% - 12px); padding: 8px; font-size: 16px; box-sizing: border-box; }
-ul { list-style: none; padding: 0; margin: 0; }
-li { background: white; margin: 5px 0; padding: 8px; display: flex; align-items: center; justify-content: space-between; border-radius: 5px; }
-.item-left { display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; }
-.item-left span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.delete-btn { background: #f44336; color: white; border: none; padding: 6px 10px; cursor: pointer; border-radius: 3px; flex-shrink: 0; }
-.date-info { font-size: 12px; color: #666; margin-left: 8px; white-space: nowrap; }
-.suggestions { background: white; border: 1px solid #ccc; margin-top: 2px; position: absolute; z-index: 1000; width: calc(100% - 12px); display: none; max-height: 140px; overflow: auto; }
-.suggestions div { padding: 6px; cursor: pointer; }
-.suggestions div:hover { background: #eee; }
-.btn-group { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-.btn { padding: 8px 12px; border-radius:6px; border:none; cursor:pointer; font-weight:600; }
-.btn-warning { background:#f1c40f; color:#000; }
-.btn-danger { background:#e74c3c; color:#fff; }
-@media (max-width:480px){
-  .date-info { display:none; }
-}
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 8px; /* 上下の余白を詰める */
+    background: #f7f7f7;
+  }
+
+  /* headerは削除し、tabsの上余白を0に */
+  .tabs {
+    display: flex;
+    background: #eee;
+    margin-top: 0;
+    border-bottom: 1px solid #ccc;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    user-select: none;
+  }
+  .tab.active {
+    border-bottom: 2px solid #2196f3;
+    font-weight: bold;
+    background: white;
+  }
+
+  .container {
+    padding: 0 8px 16px 8px;
+  }
+
+  .input-area {
+    position: relative;
+    margin-bottom: 10px;
+  }
+  input[type="text"] {
+    width: calc(100% - 12px);
+    padding: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    background: white;
+    margin: 5px 0;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+  }
+
+  /* チェック済みは文字グレーで二重線 */
+  li.checked span {
+    color: #999;
+    text-decoration-line: line-through;
+    text-decoration-style: double;
+  }
+
+  .item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    overflow: hidden;
+  }
+  /* 商品名は折返しOK */
+  .item-left span {
+    white-space: normal;
+    overflow: visible;
+    word-break: break-word;
+  }
+
+  /* チェックボックス大きめ */
+  .item-left input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .delete-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+
+  .date-info {
+    font-size: 12px;
+    color: #666;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+
+  .suggestions {
+    background: white;
+    border: 1px solid #ccc;
+    margin-top: 2px;
+    position: absolute;
+    z-index: 1000;
+    width: calc(100% - 12px);
+    display: none;
+    max-height: 140px;
+    overflow: auto;
+  }
+  .suggestions div {
+    padding: 6px;
+    cursor: pointer;
+  }
+  .suggestions div:hover {
+    background: #eee;
+  }
+
+  .btn-group {
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    margin-top:10px;
+  }
+  .btn {
+    padding: 12px 16px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+    font-size: 16px;
+  }
+  .btn-warning {
+    background:#f1c40f;
+    color:#000;
+  }
+  .btn-danger {
+    background:#e74c3c;
+    color:#fff;
+  }
+
+  /* スマホ向け微調整 */
+  @media (max-width:480px){
+    /* date-infoは非表示 */
+    .date-info {
+      display:none;
+    }
+    /* タブの文字サイズ少し小さめ */
+    .tab {
+      font-size: 14px;
+      padding: 8px;
+    }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>ショッピングリスト</h1>
-</header>
+<!-- header削除 -->
 
 <div class="tabs">
   <div class="tab active" data-tab="list1">買い物リスト</div>
@@ -45,7 +178,7 @@ li { background: white; margin: 5px 0; padding: 8px; display: flex; align-items:
 
 <div class="container">
   <div class="input-area">
-    <input type="text" id="itemInput" placeholder="商品名を入力..." autocomplete="off">
+    <input type="text" id="itemInput" placeholder="商品名を入力..." autocomplete="off" />
     <div id="suggestions" class="suggestions"></div>
   </div>
 
@@ -60,134 +193,121 @@ li { background: white; margin: 5px 0; padding: 8px; display: flex; align-items:
 </div>
 
 <script>
-/* ---- 初期設定 ---- */
-const tabs = document.querySelectorAll('.tab');
-const lists = document.querySelectorAll('.list');
-const input = document.getElementById('itemInput');
-const suggestions = document.getElementById('suggestions');
-const deleteCheckedBtn = document.getElementById('deleteCheckedBtn');
-const clearBtn = document.getElementById('clearBtn');
+  /* ---- 初期設定 ---- */
+  const tabs = document.querySelectorAll('.tab');
+  const lists = document.querySelectorAll('.list');
+  const input = document.getElementById('itemInput');
+  const suggestions = document.getElementById('suggestions');
+  const deleteCheckedBtn = document.getElementById('deleteCheckedBtn');
+  const clearBtn = document.getElementById('clearBtn');
 
-let activeListId = 'list1';
+  let activeListId = 'list1';
 
-/* タブ切替 */
-tabs.forEach(tab => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    lists.forEach(l => l.style.display = 'none');
-    document.getElementById(tab.dataset.tab).style.display = 'block';
-    activeListId = tab.dataset.tab;
-    input.focus();
-    renderList(activeListId);
+  /* タブ切替 */
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      lists.forEach(l => (l.style.display = 'none'));
+      document.getElementById(tab.dataset.tab).style.display = 'block';
+      activeListId = tab.dataset.tab;
+      input.focus();
+      renderList(activeListId);
+    });
   });
-});
 
-/* ローカルストレージ用の読込／保存 */
-function loadList(listId) {
-  return JSON.parse(localStorage.getItem(listId) || '[]');
-}
-function saveList(listId, items) {
-  localStorage.setItem(listId, JSON.stringify(items));
-}
-
-/* リスト描画（指定タブのみ） */
-function renderList(listId) {
-  const list = document.getElementById(listId);
-  list.innerHTML = '';
-  const items = loadList(listId);
-  items.forEach((item, index) => {
-    const li = document.createElement('li');
-
-    const left = document.createElement('div');
-    left.className = 'item-left';
-
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = !!item.checked;
-    checkbox.addEventListener('change', () => {
-      item.checked = checkbox.checked;
-      if (checkbox.checked) {
-        item.lastPurchased = new Date().toISOString();
-      }
-      saveList(listId, items);
-      renderList(listId);
-    });
-
-    const text = document.createElement('span');
-    text.textContent = item.name;
-    text.title = item.name;
-    // 編集可能にする（任意）
-    text.contentEditable = true;
-    text.addEventListener('input', () => {
-      item.name = text.textContent.trim();
-      saveList(listId, items);
-    });
-
-    const dateInfo = document.createElement('div');
-    dateInfo.className = 'date-info';
-    if (item.lastPurchased) {
-      const d = new Date(item.lastPurchased);
-      dateInfo.textContent = `前回: ${d.getMonth()+1}/${d.getDate()}`;
-    } else {
-      dateInfo.textContent = '';
-    }
-
-    left.appendChild(checkbox);
-    left.appendChild(text);
-    left.appendChild(dateInfo);
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'delete-btn';
-    delBtn.textContent = '削除';
-    delBtn.addEventListener('click', () => {
-      items.splice(index, 1);
-      saveList(listId, items);
-      renderList(listId);
-    });
-
-    li.appendChild(left);
-    li.appendChild(delBtn);
-    list.appendChild(li);
-  });
-}
-
-/* 履歴（サジェスト） */
-function getHistory() {
-  return JSON.parse(localStorage.getItem('history') || '[]');
-}
-function saveHistory(name) {
-  let hist = getHistory();
-  hist = hist.filter(h => h !== name);
-  hist.unshift(name);
-  if (hist.length > 3) hist = hist.slice(0,3);
-  localStorage.setItem('history', JSON.stringify(hist));
-  updateSuggestions();
-}
-function updateSuggestions() {
-  const hist = getHistory();
-  suggestions.innerHTML = '';
-  hist.forEach(h => {
-    const div = document.createElement('div');
-    div.textContent = h;
-    div.addEventListener('click', () => {
-      addItem(h);
-      suggestions.style.display = 'none';
-    });
-    suggestions.appendChild(div);
-  });
-}
-
-/* サジェスト表示 */
-input.addEventListener('input', () => {
-  const v = input.value.trim();
-  if (!v) {
-    suggestions.style.display = 'none';
-    return;
+  /* ローカルストレージ用の読込／保存 */
+  function loadList(listId) {
+    return JSON.parse(localStorage.getItem(listId) || '[]');
   }
-  const hist = getHistory().filter(h => h.includes(v));
-  suggestions.innerHTML = '';
-  if (hist.length) {
+  function saveList(listId, items) {
+    localStorage.setItem(listId, JSON.stringify(items));
+  }
+
+  /* リスト描画（指定タブのみ） */
+  function renderList(listId) {
+    const list = document.getElementById(listId);
+    list.innerHTML = '';
+    let items = loadList(listId);
+
+    // チェック済みのアイテムは最後に並べる（未チェック→チェック済み）
+    items = items.slice().sort((a, b) => {
+      if (a.checked === b.checked) return 0;
+      return a.checked ? 1 : -1;
+    });
+
+    items.forEach((item, index) => {
+      const li = document.createElement('li');
+      if (item.checked) li.classList.add('checked');
+
+      const left = document.createElement('div');
+      left.className = 'item-left';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !!item.checked;
+      checkbox.setAttribute('aria-label', `チェックボックス ${item.name}`);
+      checkbox.addEventListener('change', () => {
+        item.checked = checkbox.checked;
+        if (checkbox.checked) {
+          item.lastPurchased = new Date().toISOString();
+        }
+        saveList(listId, items);
+        renderList(listId);
+      });
+
+      const text = document.createElement('span');
+      text.textContent = item.name;
+      text.title = item.name;
+      text.contentEditable = true;
+      text.addEventListener('input', () => {
+        item.name = text.textContent.trim();
+        saveList(listId, items);
+      });
+
+      const dateInfo = document.createElement('div');
+      dateInfo.className = 'date-info';
+      if (item.lastPurchased) {
+        const d = new Date(item.lastPurchased);
+        dateInfo.textContent = `前回: ${d.getMonth() + 1}/${d.getDate()}`;
+      } else {
+        dateInfo.textContent = '';
+      }
+
+      left.appendChild(checkbox);
+      left.appendChild(text);
+      left.appendChild(dateInfo);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.textContent = '削除';
+      delBtn.addEventListener('click', () => {
+        items.splice(index, 1);
+        saveList(listId, items);
+        renderList(listId);
+      });
+
+      li.appendChild(left);
+      li.appendChild(delBtn);
+      list.appendChild(li);
+    });
+  }
+
+  /* 履歴（サジェスト） */
+  function getHistory() {
+    return JSON.parse(localStorage.getItem('history') || '[]');
+  }
+  function saveHistory(name) {
+    let hist = getHistory();
+    hist = hist.filter(h => h !== name);
+    hist.unshift(name);
+    if (hist.length > 3) hist = hist.slice(0, 3);
+    localStorage.setItem('history', JSON.stringify(hist));
+    updateSuggestions();
+  }
+  function updateSuggestions() {
+    const hist = getHistory();
+    suggestions.innerHTML = '';
     hist.forEach(h => {
       const div = document.createElement('div');
       div.textContent = h;
@@ -197,63 +317,81 @@ input.addEventListener('input', () => {
       });
       suggestions.appendChild(div);
     });
-    suggestions.style.display = 'block';
-  } else {
-    suggestions.style.display = 'none';
   }
-});
 
-/* Enterで追加 */
-input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && input.value.trim()) {
-    addItem(input.value.trim());
-    suggestions.style.display = 'none';
-  }
-});
+  /* サジェスト表示 */
+  input.addEventListener('input', () => {
+    const v = input.value.trim();
+    if (!v) {
+      suggestions.style.display = 'none';
+      return;
+    }
+    const hist = getHistory().filter(h => h.includes(v));
+    suggestions.innerHTML = '';
+    if (hist.length) {
+      hist.forEach(h => {
+        const div = document.createElement('div');
+        div.textContent = h;
+        div.addEventListener('click', () => {
+          addItem(h);
+          suggestions.style.display = 'none';
+        });
+        suggestions.appendChild(div);
+      });
+      suggestions.style.display = 'block';
+    } else {
+      suggestions.style.display = 'none';
+    }
+  });
 
-/* 追加処理 */
-function addItem(name) {
-  if (!name) return;
-  const items = loadList(activeListId);
-  // 重複チェック（任意）
-  if (items.some(i => i.name === name)) {
+  /* Enterで追加 */
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && input.value.trim()) {
+      addItem(input.value.trim());
+      suggestions.style.display = 'none';
+    }
+  });
+
+  /* 追加処理 */
+  function addItem(name) {
+    if (!name) return;
+    const items = loadList(activeListId);
+    // 重複チェック（任意）
+    if (items.some(i => i.name === name)) {
+      input.value = '';
+      input.focus();
+      return;
+    }
+    items.push({ name, checked: false, lastPurchased: null });
+    saveList(activeListId, items);
+    saveHistory(name);
     input.value = '';
-    input.focus();
-    return;
+    renderList(activeListId);
   }
-  items.push({ name, checked: false, lastPurchased: null });
-  saveList(activeListId, items);
-  saveHistory(name);
-  input.value = '';
-  renderList(activeListId);
-}
 
-/* ---- ここが今回の追加関数 ---- */
+  /* チェック済み削除（active tab の checked=true を削除） */
+  function deleteChecked() {
+    const items = loadList(activeListId);
+    const filtered = items.filter(i => !i.checked);
+    if (filtered.length === items.length) return;
+    saveList(activeListId, filtered);
+    renderList(activeListId);
+  }
 
-/* チェック済み削除（active tab の checked=true を削除） */
-function deleteChecked() {
-  const items = loadList(activeListId);
-  const filtered = items.filter(i => !i.checked);
-  // 何も削除がなければ何もしない
-  if (filtered.length === items.length) return;
-  saveList(activeListId, filtered);
-  renderList(activeListId);
-}
+  /* 全削除（確認あり） */
+  function clearAll() {
+    if (!confirm('本当にこのタブの項目をすべて削除しますか？')) return;
+    saveList(activeListId, []);
+    renderList(activeListId);
+  }
 
-/* 全削除（確認あり） */
-function clearAll() {
-  if (!confirm('本当にこのタブの項目をすべて削除しますか？')) return;
-  saveList(activeListId, []);
-  renderList(activeListId);
-}
+  /* イベント紐付け */
+  deleteCheckedBtn.addEventListener('click', deleteChecked);
+  clearBtn.addEventListener('click', clearAll);
 
-/* イベント紐付け */
-deleteCheckedBtn.addEventListener('click', deleteChecked);
-clearBtn.addEventListener('click', clearAll);
-
-/* 初期描画 */
-updateSuggestions();
-['list1','list2','list3'].forEach(renderList);
+  /* 初期描画 */
+  updateSuggestions();
+  ['list1', 'list2', 'list3'].forEach(renderList);
 </script>
 
 </body>
