@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ショッピングリスト</title>
+<style>
+  body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 1em; }
+  h1 { text-align: center; }
+  .item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ccc; padding: 0.5em 0; }
+  .left { display: flex; align-items: center; gap: 0.5em; }
+  button { background-color: #ff4d4d; border: none; padding: 0.3em 0.6em; color: white; border-radius: 5px; cursor: pointer; }
+  button:hover { background-color: #e60000; }
+  input[type=text] { width: 100%; padding: 0.5em; margin-bottom: 0.5em; }
+  select { padding: 0.3em; margin-bottom: 0.5em; }
+</style>
+</head>
+<body>
+
+<h1>ショッピングリスト</h1>
+<input type="text" id="itemInput" placeholder="商品を入力してEnter">
+<select id="historySelect"></select>
+<div id="list"></div>
+
+<script>
+const input = document.getElementById('itemInput');
+const list = document.getElementById('list');
+const historySelect = document.getElementById('historySelect');
+
+let items = JSON.parse(localStorage.getItem('items') || '[]');
+let history = JSON.parse(localStorage.getItem('history') || '[]');
+
+function save() {
+  localStorage.setItem('items', JSON.stringify(items));
+  localStorage.setItem('history', JSON.stringify(history.slice(0, 3))); // 履歴は3件
+}
+
+function render() {
+  list.innerHTML = '';
+  items.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <div class="left">
+        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck(${index})">
+        <span>${item.name}</span>
+      </div>
+      <button onclick="removeItem(${index})">削除</button>
+    `;
+    list.appendChild(div);
+  });
+  renderHistory();
+}
+
+function renderHistory() {
+  historySelect.innerHTML = '<option value="">過去の履歴から選択</option>';
+  history.forEach(h => {
+    const opt = document.createElement('option');
+    opt.value = h;
+    opt.textContent = h;
+    historySelect.appendChild(opt);
+  });
+}
+
+function addItem(name) {
+  if (!name) return;
+  items.push({ name, checked: false });
+  if (!history.includes(name)) {
+    history.unshift(name);
+  }
+  save();
+  render();
+}
+
+function toggleCheck(index) {
+  items[index].checked = !items[index].checked;
+  save();
+  render();
+}
+
+function removeItem(index) {
+  items.splice(index, 1);
+  save();
+  render();
+}
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    addItem(input.value.trim());
+    input.value = '';
+  }
+});
+
+historySelect.addEventListener('change', () => {
+  if (historySelect.value) {
+    addItem(historySelect.value);
+    historySelect.value = '';
+  }
+});
+
+render();
+</script>
+
+</body>
+</html>
